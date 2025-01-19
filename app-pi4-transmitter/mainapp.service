@@ -1,0 +1,16 @@
+[Unit]
+Description=Start main.py
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/eeeg/Desktop/app/venv/bin/python /home/eeeg/Desktop/app/main.py
+WorkingDirectory=/home/eeeg/Desktop/app
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=eeeg
+Group=eeeg
+
+[Install]
+WantedBy=multi-user.target

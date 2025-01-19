@@ -1,0 +1,141 @@
+---
+const apiUrl = "http://192.168.0.126:5000/";
+const response = await fetch(apiUrl);
+const data = await response.json();
+
+function evaluateWifiStrength(strength) {
+  if (strength >= -50) {
+    return "God";
+  } else if (strength >= -60) {
+    return "Acceptabel";
+  } else if (strength >= -70) {
+    return "Dårlig";
+  } else {
+    return "Meget dårlig";
+  }
+}
+
+function evaluateTemperature(temp) {
+  if (temp <= 60) {
+    return "Normal";
+  } else if (temp <= 80) {
+    return "Varm";
+  } else {
+    return "Overophedet";
+  }
+}
+
+const filteredCategories = Object.entries(data.categories).filter(([category, _]) => category !== "Hypertensive Crisis");
+---
+
+<html class="h-full bg-[#000000] text-white">
+  <head>
+    <title>Oversigt</title>
+  </head>
+  <body class="h-full font-sans bg-[#000000]">
+    <div class="flex h-full">
+      <aside class="w-64 bg-[#141414] p-6 border-r border-[#222222] fixed h-full">
+        <h2 class="text-3xl font-bold text-white mb-6">Menu</h2>
+        <ul class="flex flex-col space-y-1 font-bold">
+          <li>
+            <a href="/" class="block text-white hover:bg-[#222222] hover:text-white p-2 rounded">
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="/devices" class="block text-white hover:bg-[#222222] hover:text-white p-2 rounded">
+              Enheder
+            </a>
+          </li>
+          <li>
+            <a href="/health" class="block text-white hover:bg-[#222222] hover:text-white p-2 rounded">
+              Sundhedsdata
+            </a>
+          </li>
+        </ul>
+      </aside>
+
+      <div class="flex-1 p-6 ml-64">
+        <h3 class="text-3xl font-bold text-white mb-4">Dashboard</h3>
+
+        <h3 class="text-2xl font-bold text-white mb-4 mt-8">Blodtrykskategorier</h3>
+        <div class="grid grid-cols-4 gap-6 mb-12">
+          {filteredCategories.map(([category, count]) => (
+            <div key={category} class="p-4 bg-[#141414] rounded-lg shadow-md border border-[#222222] hover:bg-[#222222]">
+              <p class="font-semibold text-white hover:text-gray-300">{category}</p>
+              <p class="text-white hover:text-gray-300">{count} Posteringer</p>
+            </div>
+          ))}
+        </div>
+
+        <h3 class="text-2xl font-bold text-white mb-4 mt-8">Seneste Enheder</h3>
+        <div class="grid grid-cols-2 gap-6">
+          {data.devices.map((device) => (
+            <div key={device.id} class="p-4 bg-[#141414] rounded-lg shadow-md border border-[#222222] hover:bg-[#222222]">
+              <a href={`/device/${device.id}`} class="text-white hover:text-gray-300">
+                <div class="grid grid-cols-2 gap-6">
+                  <div>
+                    <p><strong>Enhed ID</strong></p>
+                    <p>{device.id}</p>
+                  </div>
+                  <div>
+                    <p><strong>Temperatur</strong></p>
+                    <p>{evaluateTemperature(device.temperature)}</p>
+                  </div>
+                  <div>
+                    <p><strong>IP Adresse</strong></p>
+                    <p>{device.ip_address}</p>
+                  </div>
+                  <div>
+                    <p><strong>Wi-Fi Signalstyrke</strong></p>
+                    <p>{evaluateWifiStrength(device.wifi_strength)}</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          ))}
+        </div>
+
+        <h3 class="text-2xl font-bold text-white mb-4 mt-8">Sundhedsdata</h3>
+        <div class="grid grid-cols-2 gap-6">
+          {data.health_data.map((healthRecord) => (
+            <div key={healthRecord.cpr} class="p-4 bg-[#141414] rounded-lg shadow-md border border-[#222222] hover:bg-[#222222]">
+              <a href={`/person/${healthRecord.cpr}`} class="text-white hover:text-gray-300">
+                <div class="grid grid-cols-2 gap-6">
+                  <div>
+                    <p><strong>CPR Nummer</strong></p>
+                    <p>{healthRecord.cpr}</p>
+                  </div>
+                  <div>
+                    <p><strong>Systolisk Blodtryk</strong></p>
+                    <p>{healthRecord.systolic}</p>
+                  </div>
+                  <div>
+                    <p><strong>Diastolisk Blodtryk</strong></p>
+                    <p>{healthRecord.diastolic}</p>
+                  </div>
+                  <div>
+                    <p><strong>Vægt</strong></p>
+                    <p>{healthRecord.weight} kg</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          ))}
+        </div>
+
+        <h3 class="text-2xl font-bold text-white mb-4 mt-8">Temperaturdata</h3>
+        <div class="grid grid-cols-2 gap-6 pb-6">
+          {data.temperature_data.map((temp) => (
+            <div key={temp.timestamp} class="p-4 bg-[#141414] rounded-lg shadow-md border border-[#222222] hover:bg-[#222222]">
+              <p><strong>Tidspunkt</strong></p>
+              <p>{new Date(temp.timestamp).toLocaleString()}</p>
+              <p><strong>Temperatur</strong></p>
+              <p>{evaluateTemperature(temp.temperature)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
